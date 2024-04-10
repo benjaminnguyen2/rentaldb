@@ -1,0 +1,349 @@
+drop database if exists rentalDB;
+create database rentalDB;
+use rentalDB;
+
+create table Owner(
+    id char(5) not null primary key,
+    fname varchar(60),
+    lname varchar(60),
+    phone char(10));
+
+create table RentalGroup(
+    code char(4) not null primary key,
+    accommodation varchar(60),
+    bedrooms int,
+    bathrooms int,
+    parking boolean,
+    accessibility boolean,
+    laundry varchar(60),
+    budget decimal(7,2));
+
+create table Manager(
+    id char(5) not null primary key,
+    fname varchar(60),
+    lname varchar(60),
+    phone char(10));
+
+create table RentalProperty(
+    id char(6) not null primary key,
+    rentedGroupId char(4),
+    leaseSigned date,
+    end_date date, 
+    managerId char(5),
+    managerStartYear int, 
+    foreign key(rentedGroupId) references RentalGroup(code),
+    foreign key(managerId) references Manager(id) on delete cascade);
+
+create table Renter(
+    studentID char(8) not null primary key,
+    program varchar(60),
+    id char(5) not null,
+    gradyear int,
+    fname varchar(60),
+    lname varchar(60),
+    groupCode char(4) not null,
+    foreign key(groupCode) references RentalGroup(code));
+
+create table Property(
+    id char(6) not null primary key,
+    bedrooms int,
+    bathrooms int,
+    parking boolean,
+    laundry varchar(60),
+    cost decimal(7,2),
+    accessibility boolean,
+    listed_date date,
+    street varchar(60),
+    city varchar(60),
+    province char(20),
+    unit int,
+    type varchar(60), 
+    foreign key(id) references RentalProperty(id) on delete cascade);
+
+create table House(
+    id char(6) not null primary key,
+    fenceType varchar(60),
+    foreign key(id) references Property(id) on delete cascade);
+
+create table Apartment(
+    id char(6) not null primary key,
+    floor int,
+    elevator boolean,
+    foreign key(id) references Property(id) on delete cascade);
+
+create table Room(
+    id char(6) not null primary key,
+    totalShared int,
+    kitchen boolean,
+    foreign key(id) references Property(id) on delete cascade);
+
+create table Furniture(
+    furnishing varchar(200) not null,
+    propertyId char(6) not null,
+    primary key(propertyId, furnishing),
+    foreign key(propertyId) references Property(id) on delete cascade);
+
+create table Owner_Property(
+    ownerId char(5) not null,
+    propertyId char(6) not null,
+    primary key(ownerId, propertyId),
+    foreign key(ownerId) references Owner(id),
+    foreign key(propertyId) references Property(id) on delete cascade);
+
+-- Example data for Owner table
+insert into Owner (id, fname, lname, phone) values
+('O001', 'John', 'Doe', '1234567890'),
+('O002', 'Jane', 'Smith', '9876543210'),
+('O003', 'Michael', 'Johnson', '5555555555'),
+('O004', 'Emily', 'Williams', '1111111111'),
+('O005', 'Daniel', 'Brown', '2222222222'),
+('O006', 'Sarah', 'Taylor', '3333333333'),
+('O007', 'Ryan', 'Martinez', '4444444444'),
+('O008', 'Jessica', 'Garcia', '5555555555'),
+('O009', 'Matthew', 'Robinson', '6666666666'),
+('O010', 'Olivia', 'Hernandez', '7777777777');
+
+-- Example data for RentalGroup table
+insert into RentalGroup (code, accommodation, bedrooms, bathrooms, parking, accessibility, laundry, budget) values
+('G001', 'Apartment', 2, 1, true, true, 'Shared', 1500.00),
+('G002', 'House', 3, 2, true, true, 'Ensuite', 2000.00),
+('G003', 'Room', 1, 1, false, true, 'None', 800.00),
+('G004', 'Apartment', 1, 1, false, true, 'None', 1000.00),
+('G005', 'House', 4, 3, true, true, 'Ensuite', 2500.00),
+('G006', 'Room', 2, 1, false, true, 'Shared', 900.00),
+('G007', 'Apartment', 3, 2, true, true, 'Ensuite', 1800.00),
+('G008', 'House', 2, 1, true, true, 'Shared', 1600.00),
+('G009', 'Room', 1, 1, false, true, 'None', 750.00),
+('G010', 'Apartment', 2, 2, true, true, 'Shared', 1700.00),
+('G011', 'House', 3, 2, true, true, 'Ensuite', 2200.00),
+('G012', 'Room', 1, 1, false, true, 'None', 700.00);
+
+-- Example data for Manager table
+insert into Manager (id, fname, lname, phone) values
+('M001', 'David', 'Brown', '1111111111'),
+('M002', 'Emily', 'Wilson', '2222222222'),
+('M003', 'Chris', 'Miller', '3333333333'),
+('M004', 'Laura', 'Garcia', '4444444444'),
+('M005', 'Mark', 'Martinez', '5555555555'),
+('M006', 'Ashley', 'Hernandez', '6666666666'),
+('M007', 'Steven', 'Robinson', '7777777777'),
+('M008', 'Samantha', 'Lopez', '8888888888'),
+('M009', 'Justin', 'Lee', '9999999999'),
+('M010', 'Lauren', 'Young', '0000000000');
+
+-- Example data for RentalProperty table
+insert into RentalProperty (id, rentedGroupId, leaseSigned, end_date, managerId, managerStartYear) values
+('P001', 'G002', '2024-01-01', '2025-01-01', 'M001', 2024),
+('P002', 'G007', '2024-02-01', '2025-02-01', 'M002', 2024),
+('P003', 'G008', '2024-03-01', '2025-03-01', 'M003', 2024),
+('P004', 'G010', '2024-04-01', '2025-04-01', 'M004', 2024),
+('P005', 'G006', '2024-05-01', '2025-05-01', NULL, NULL),
+('P006', 'G001', '2024-06-01', '2025-06-01', NULL, NULL),
+('P007', 'G003', '2024-07-01', '2025-07-01', 'M007', 2024),
+('P008', 'G009', '2024-08-01', '2025-08-01', 'M008', 2024),
+('P009', 'G005', '2024-09-01', '2025-09-01', 'M009', 2024),
+('P010', 'G004', '2024-10-01', '2025-10-01', 'M010', 2024),
+('P011', 'G012', '2024-11-01', '2025-11-01', NULL, NULL),
+('P012', 'G011', '2024-12-01', '2025-12-01', 'M002', 2024),
+('P013', 'G004', '2024-01-01', '2025-01-01', 'M003', 2024),
+('P014', 'G006', '2024-02-01', '2025-02-01', NULL, NULL),
+('P015', 'G002', '2024-03-01', '2025-03-01', 'M005', 2024),
+('P016', 'G010', '2024-04-01', '2025-04-01', 'M006', 2024),
+('P017', 'G009', '2024-05-01', '2025-05-01', NULL, NULL),
+('P018', 'G012', '2024-06-01', '2025-06-01', 'M008', 2024),
+('P019', 'G011', '2024-07-01', '2025-07-01', NULL, NULL),
+('P020', 'G007', '2024-08-01', '2025-08-01', 'M010', 2024),
+('P021', 'G001', '2024-09-01', '2025-09-01', 'M001', 2024),
+('P022', 'G003', '2024-10-01', '2025-10-01', 'M002', 2024),
+('P023', 'G005', '2024-11-01', '2025-11-01', 'M003', 2024),
+('P024', 'G012', '2024-12-01', '2025-12-01', 'M004', 2024),
+('P025', 'G002', '2025-01-01', '2026-01-01', 'M005', 2025),
+('P026', 'G006', '2025-02-01', '2026-02-01', 'M006', 2025),
+('P027', 'G011', '2025-03-01', '2026-03-01', 'M007', 2025),
+('P028', 'G009', '2025-04-01', '2026-04-01', 'M008', 2025),
+('P029', 'G007', '2025-05-01', '2026-05-01', NULL, NULL),
+('P030', 'G004', '2025-06-01', '2026-06-01', NULL, NULL),
+('P031', 'G001', '2025-07-01', '2026-07-01', NULL, NULL),
+('P032', 'G003', '2025-08-01', '2026-08-01', NULL, NULL),
+('P033', 'G010', '2025-09-01', '2026-09-01', NULL, NULL),
+('P034', 'G008', '2025-10-01', '2026-10-01', NULL, NULL),
+('P035', 'G009', '2025-11-01', '2026-11-01', NULL, NULL),
+('P036', 'G005', '2025-12-01', '2026-12-01', NULL, NULL);
+
+insert into Renter (studentID, program, id, gradyear, fname, lname, groupCode) values
+('S001', 'Computer Science', 'RP001', 2025, 'Alice', 'Johnson', 'G001'),
+('S002', 'Engineering', 'RP002', 2025, 'Bob', 'Smith', 'G002'),
+('S003', 'Business', 'RP003', 2025, 'Eva', 'Brown', 'G003'),
+('S004', 'Psychology', 'RP004', 2025, 'Mike', 'Davis', 'G004'),
+('S005', 'Biology', 'RP005', 2025, 'Sophia', 'Taylor', 'G005'),
+('S006', 'Art', 'RP006', 2025, 'Emma', 'Clark', 'G006'),
+('S007', 'History', 'RP007', 2025, 'Jack', 'Moore', 'G007'),
+('S008', 'Mathematics', 'RP008', 2025, 'Grace', 'Gonzalez', 'G008'),
+('S009', 'English', 'RP009', 2025, 'Ryan', 'Rodriguez', 'G009'),
+('S010', 'Chemistry', 'RP010', 2025, 'Natalie', 'Lewis', 'G010'),
+('S011', 'Physics', 'RP011', 2025, 'Jason', 'Walker', 'G011'),
+('S012', 'Sociology', 'RP012', 2025, 'Lily', 'Perez', 'G012'),
+('S013', 'Computer Science', 'RP013', 2025, 'Oliver', 'Hill', 'G002'),
+('S014', 'Engineering', 'RP014', 2025, 'Ava', 'Baker', 'G007'),
+('S015', 'Business', 'RP015', 2025, 'William', 'Green', 'G010'),
+('S016', 'Psychology', 'RP016', 2025, 'Samantha', 'Adams', 'G011'),
+('S017', 'Biology', 'RP017', 2025, 'David', 'Evans', 'G005'),
+('S018', 'Art', 'RP018', 2025, 'Elizabeth', 'King', 'G009'),
+('S019', 'History', 'RP019', 2025, 'Daniel', 'Scott', 'G004'),
+('S020', 'Mathematics', 'RP020', 2025, 'Avery', 'Campbell', 'G001'),
+('S021', 'English', 'RP021', 2025, 'Chloe', 'Martinez', 'G003'),
+('S022', 'Chemistry', 'RP022', 2025, 'Andrew', 'Hernandez', 'G012'),
+('S023', 'Physics', 'RP023', 2025, 'Mia', 'Young', 'G006'),
+('S024', 'Sociology', 'RP024', 2025, 'Ethan', 'Lopez', 'G008'),
+('S025', 'Computer Science', 'RP025', 2025, 'Madison', 'Scott', 'G002'),
+('S026', 'Engineering', 'RP026', 2025, 'Michael', 'Hill', 'G007'),
+('S027', 'Business', 'RP027', 2025, 'Harper', 'Wright', 'G010'),
+('S028', 'Psychology', 'RP028', 2025, 'Evelyn', 'Allen', 'G011'),
+('S029', 'Biology', 'RP029', 2025, 'Benjamin', 'Nelson', 'G005'),
+('S030', 'Art', 'RP030', 2025, 'Mason', 'Carter', 'G009'),
+('S031', 'History', 'RP031', 2025, 'Aria', 'Mitchell', 'G004'),
+('S032', 'Mathematics', 'RP032', 2025, 'Hudson', 'Roberts', 'G001'),
+('S033', 'English', 'RP033', 2025, 'Victoria', 'Gomez', 'G003'),
+('S034', 'Chemistry', 'RP034', 2025, 'Leo', 'Phillips', 'G012'),
+('S035', 'Physics', 'RP035', 2025, 'Lillian', 'Edwards', 'G006'),
+('S036', 'Sociology', 'RP036', 2025, 'Mateo', 'Sanders', 'G008');
+
+insert into Property (id, bedrooms, bathrooms, parking, laundry, cost, accessibility, listed_date, street, city, province, unit, type) values
+('P001', 2, 1, true, 'Shared', 1500.00, true, '2024-01-01', '123 Main St', 'City A', 'Province A', 1, 'Apartment'),
+('P002', 3, 2, true, 'Ensuite', 2000.00, true, '2024-02-01', '456 Elm St', 'City B', 'Province B', 2, 'House'),
+('P003', 1, 1, false, 'None', 800.00, true, '2024-03-01', '789 Oak St', 'City C', 'Province C', 3, 'Room'),
+('P004', 1, 1, false, 'None', 1000.00, true, '2024-04-01', '101 Pine St', 'City D', 'Province D', 4, 'Apartment'),
+('P005', 4, 3, true, 'Ensuite', 2500.00, true, '2024-05-01', '222 Cedar St', 'City E', 'Province E', 5, 'House'),
+('P006', 2, 1, false, 'Shared', 900.00, true, '2024-06-01', '333 Maple St', 'City F', 'Province F', 6, 'Room'),
+('P007', 3, 2, true, 'Ensuite', 1800.00, true, '2024-07-01', '444 Pineapple St', 'City G', 'Province G', 7, 'Apartment'),
+('P008', 2, 1, true, 'Shared', 1600.00, true, '2024-08-01', '555 Orange St', 'City H', 'Province H', 8, 'House'),
+('P009', 1, 1, false, 'None', 750.00, true, '2024-09-01', '666 Banana St', 'City I', 'Province I', 9, 'Room'),
+('P010', 2, 2, true, 'Shared', 1700.00, true, '2024-10-01', '777 Grape St', 'City J', 'Province J', 10, 'Apartment'),
+('P011', 3, 2, true, 'Ensuite', 2200.00, true, '2024-11-01', '888 Lemon St', 'City K', 'Province K', 11, 'House'),
+('P012', 1, 1, false, 'None', 700.00, true, '2024-12-01', '999 Strawberry St', 'City L', 'Province L', 12, 'Room'),
+('P013', 2, 1, true, 'Shared', 1500.00, true, '2024-01-01', '123 Main St', 'City A', 'Province A', 1, 'Apartment'),
+('P014', 3, 2, true, 'Ensuite', 2000.00, true, '2024-02-01', '456 Elm St', 'City B', 'Province B', 2, 'House'),
+('P015', 1, 1, false, 'None', 800.00, true, '2024-03-01', '789 Oak St', 'City C', 'Province C', 3, 'Room'),
+('P016', 1, 1, false, 'None', 1000.00, true, '2024-04-01', '101 Pine St', 'City D', 'Province D', 4, 'Apartment'),
+('P017', 4, 3, true, 'Ensuite', 2500.00, true, '2024-05-01', '222 Cedar St', 'City E', 'Province E', 5, 'House'),
+('P018', 2, 1, false, 'Shared', 900.00, true, '2024-06-01', '333 Maple St', 'City F', 'Province F', 6, 'Room'),
+('P019', 3, 2, true, 'Ensuite', 1800.00, true, '2024-07-01', '444 Pineapple St', 'City G', 'Province G', 7, 'Apartment'),
+('P020', 2, 1, true, 'Shared', 1600.00, true, '2024-08-01', '555 Orange St', 'City H', 'Province H', 8, 'House'),
+('P021', 1, 1, false, 'None', 750.00, true, '2024-09-01', '666 Banana St', 'City I', 'Province I', 9, 'Room'),
+('P022', 2, 2, true, 'Shared', 1700.00, true, '2024-10-01', '777 Grape St', 'City J', 'Province J', 10, 'Apartment'),
+('P023', 3, 2, true, 'Ensuite', 2200.00, true, '2024-11-01', '888 Lemon St', 'City K', 'Province K', 11, 'House'),
+('P024', 1, 1, false, 'None', 700.00, true, '2024-12-01', '999 Strawberry St', 'City L', 'Province L', 12, 'Room'),
+('P025', 2, 1, true, 'Shared', 1500.00, true, '2024-01-01', '123 Main St', 'City A', 'Province A', 1, 'Apartment'),
+('P026', 3, 2, true, 'Ensuite', 2000.00, true, '2024-02-01', '456 Elm St', 'City B', 'Province B', 2, 'House'),
+('P027', 1, 1, false, 'None', 800.00, true, '2024-03-01', '789 Oak St', 'City C', 'Province C', 3, 'Room'),
+('P028', 1, 1, false, 'None', 1000.00, true, '2024-04-01', '101 Pine St', 'City D', 'Province D', 4, 'Apartment'),
+('P029', 4, 3, true, 'Ensuite', 2500.00, true, '2024-05-01', '222 Cedar St', 'City E', 'Province E', 5, 'House'),
+('P030', 2, 1, false, 'Shared', 900.00, true, '2024-06-01', '333 Maple St', 'City F', 'Province F', 6, 'Room'),
+('P031', 3, 2, true, 'Ensuite', 1800.00, true, '2024-07-01', '444 Pineapple St', 'City G', 'Province G', 7, 'Apartment'),
+('P032', 2, 1, true, 'Shared', 1600.00, true, '2024-08-01', '555 Orange St', 'City H', 'Province H', 8, 'House'),
+('P033', 1, 1, false, 'None', 750.00, true, '2024-09-01', '666 Banana St', 'City I', 'Province I', 9, 'Room'),
+('P034', 2, 2, true, 'Shared', 1700.00, true, '2024-10-01', '777 Grape St', 'City J', 'Province J', 10, 'Apartment'),
+('P035', 3, 2, true, 'Ensuite', 2200.00, true, '2024-11-01', '888 Lemon St', 'City K', 'Province K', 11, 'House'),
+('P036', 1, 1, false, 'None', 700.00, true, '2024-12-01', '999 Strawberry St', 'City L', 'Province L', 12, 'Room');
+
+insert into House (id, fenceType) values
+('P002', 'Wooden'),
+('P005', 'Brick'),
+('P008', 'Metal'),
+('P011', 'Wooden'),
+('P014', 'Metal'),
+('P017', 'Brick'),
+('P020', 'Wooden'),
+('P023', 'Brick');
+
+insert into Apartment (id, floor, elevator) values
+('P001', 2, true),
+('P004', 5, false),
+('P007', 1, true),
+('P010', 3, true),
+('P013', 4, false),
+('P016', 6, true),
+('P019', 2, false),
+('P022', 7, true),
+('P025', 1, false),
+('P028', 3, true),
+('P031', 4, false),
+('P034', 2, true);
+
+insert into Room (id, totalShared, kitchen) values
+('P003', 3, true),
+('P006', 2, false),
+('P009', 4, true),
+('P012', 3, false),
+('P015', 2, true),
+('P018', 4, false),
+('P021', 3, true),
+('P024', 2, false),
+('P027', 4, true),
+('P030', 3, false),
+('P033', 2, true),
+('P036', 4, false);
+
+insert into Furniture (furnishing, propertyId) values
+('Bed', 'P003'),
+('Desk', 'P003'),
+('Chair', 'P003'),
+('Sofa', 'P002'),
+('Table', 'P002'),
+('Lamp', 'P001'),
+('Bed', 'P006'),
+('Desk', 'P006'),
+('Chair', 'P006'),
+('Sofa', 'P005'),
+('Table', 'P005'),
+('Lamp', 'P004'),
+('Bed', 'P009'),
+('Desk', 'P009'),
+('Chair', 'P009'),
+('Sofa', 'P008'),
+('Table', 'P008'),
+('Lamp', 'P007'),
+('Bed', 'P012'),
+('Desk', 'P012'),
+('Chair', 'P012'),
+('Sofa', 'P011'),
+('Table', 'P011'),
+('Lamp', 'P010');
+
+insert into Owner_Property (ownerId, propertyId) values
+('O001', 'P001'),
+('O002', 'P002'),
+('O003', 'P003'),
+('O004', 'P004'),
+('O005', 'P005'),
+('O006', 'P006'),
+('O007', 'P007'),
+('O008', 'P008'),
+('O009', 'P009'),
+('O010', 'P010'),
+('O001', 'P011'),
+('O002', 'P012'),
+('O003', 'P013'),
+('O004', 'P014'),
+('O005', 'P015'),
+('O006', 'P016'),
+('O007', 'P017'),
+('O008', 'P018'),
+('O009', 'P019'),
+('O010', 'P020'),
+('O001', 'P021'),
+('O002', 'P022'),
+('O003', 'P023'),
+('O004', 'P024'),
+('O005', 'P025'),
+('O006', 'P026'),
+('O007', 'P027'),
+('O008', 'P028'),
+('O009', 'P029'),
+('O010', 'P030'),
+('O001', 'P031'),
+('O002', 'P032'),
+('O003', 'P033'),
+('O004', 'P034'),
+('O005', 'P035'),
+('O006', 'P036');
